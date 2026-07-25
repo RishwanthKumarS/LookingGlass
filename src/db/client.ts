@@ -42,3 +42,5 @@ export function initDatabase() {
     // Ignore if column already exists
   }
 }
+
+initDatabase();

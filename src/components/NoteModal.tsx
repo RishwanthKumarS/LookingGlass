@@ -12,7 +12,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Note, updateNote } from '../db/queries/notes';
-import { colors, spacing, fontSize } from '../theme/globalStyles';
+import { useTheme } from '../theme/ThemeContext';
+import { spacing, fontSize } from '../theme/globalStyles';
 
 interface Props {
   note: Note | null;
@@ -35,6 +36,67 @@ function formatDateTime(note: Note) {
 }
 
 export default function NoteModal({ note, visible, onClose, onUpdated }: Props) {
+  const { currentTheme } = useTheme();
+
+  const styles = StyleSheet.create({
+    overlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.6)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    sheet: {
+      width: MODAL_SIZE,
+      height: MODAL_SIZE,
+      backgroundColor: currentTheme.surface,
+      borderRadius: 16,
+      padding: spacing.lg,
+      borderWidth: 1,
+      borderColor: currentTheme.border,
+    },
+    scrollArea: {
+      flex: 1,
+    },
+    closeButton: {
+      position: 'absolute',
+      top: spacing.md,
+      right: spacing.md,
+      zIndex: 1,
+    },
+    subject: {
+      color: currentTheme.accent,
+      fontSize: fontSize.sm,
+      marginBottom: spacing.sm,
+      fontWeight: '600',
+    },
+    content: {
+      color: currentTheme.text,
+      fontSize: fontSize.md,
+      lineHeight: 22,
+    },
+    editInput: {
+      flex: 1,
+      color: currentTheme.text,
+      fontSize: fontSize.md,
+      lineHeight: 22,
+      marginTop: spacing.lg,
+      textAlignVertical: 'top',
+    },
+    footerRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginTop: spacing.sm,
+      paddingTop: spacing.sm,
+      borderTopWidth: 1,
+      borderTopColor: currentTheme.border,
+    },
+    meta: {
+      color: currentTheme.textMuted,
+      fontSize: fontSize.sm,
+    },
+  });
+
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState('');
 
@@ -92,7 +154,7 @@ export default function NoteModal({ note, visible, onClose, onUpdated }: Props) 
         />
         <Animated.View style={[styles.sheet, { transform: [{ scale }] }]}>
           <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
-            <Ionicons name="close" size={22} color={colors.text} />
+            <Ionicons name="close" size={22} color={currentTheme.text} />
           </TouchableOpacity>
 
           {isEditing ? (
@@ -102,7 +164,7 @@ export default function NoteModal({ note, visible, onClose, onUpdated }: Props) 
               onChangeText={setDraft}
               multiline
               autoFocus
-              placeholderTextColor={colors.textMuted}
+              placeholderTextColor={currentTheme.textMuted}
             />
           ) : (
             <ScrollView style={styles.scrollArea} contentContainerStyle={{ paddingTop: spacing.lg }}>
@@ -117,7 +179,7 @@ export default function NoteModal({ note, visible, onClose, onUpdated }: Props) 
               <Ionicons
                 name={isEditing ? 'checkmark-outline' : 'create-outline'}
                 size={22}
-                color={colors.accent}
+                color={currentTheme.accent}
               />
             </TouchableOpacity>
           </View>
@@ -126,62 +188,3 @@ export default function NoteModal({ note, visible, onClose, onUpdated }: Props) 
     </Modal>
   );
 }
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  sheet: {
-    width: MODAL_SIZE,
-    height: MODAL_SIZE,
-    backgroundColor: colors.surface,
-    borderRadius: 16,
-    padding: spacing.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  scrollArea: {
-    flex: 1,
-  },
-  closeButton: {
-    position: 'absolute',
-    top: spacing.md,
-    right: spacing.md,
-    zIndex: 1,
-  },
-  subject: {
-    color: colors.accent,
-    fontSize: fontSize.sm,
-    marginBottom: spacing.sm,
-    fontWeight: '600',
-  },
-  content: {
-    color: colors.text,
-    fontSize: fontSize.md,
-    lineHeight: 22,
-  },
-  editInput: {
-    flex: 1,
-    color: colors.text,
-    fontSize: fontSize.md,
-    lineHeight: 22,
-    marginTop: spacing.lg,
-    textAlignVertical: 'top',
-  },
-  footerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: spacing.sm,
-    paddingTop: spacing.sm,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-  },
-  meta: {
-    color: colors.textMuted,
-    fontSize: fontSize.sm,
-  },
-});

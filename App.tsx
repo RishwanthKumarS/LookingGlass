@@ -1,20 +1,24 @@
-import { useEffect } from 'react';
 import { View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import RootNavigator from './src/navigation/RootNavigator';
-import { colors } from './src/theme/globalStyles';
-import { initDatabase } from './src/db/client';
+import { ThemeProvider, useTheme } from './src/theme/ThemeContext';
+import './src/db/client'; // Intitialize Database on app start
 
-export default function App() {
-  useEffect(() => {
-    initDatabase();
-  }, []);
-
+function AppContent() {
+  const { currentTheme } = useTheme();
   return (
-    <View style={{ flex: 1, backgroundColor: colors.background }}>
+    <View style={{ flex: 1, backgroundColor: currentTheme.background }}>
       <SafeAreaProvider>
         <RootNavigator />
       </SafeAreaProvider>
     </View>
+  );
+}
+
+export default function App() {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
   );
 }

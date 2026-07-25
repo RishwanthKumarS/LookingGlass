@@ -21,10 +21,16 @@ export function addNote(content: string, subject: string | null = null) {
 }
 
 export function getAllNotes(): Note[] {
-  return db.getAllSync<Note>(`SELECT * FROM notes ORDER BY created_at DESC;`);
+  return db.getAllSync<Note>(
+    `SELECT * FROM notes ORDER BY COALESCE(updated_at, created_at) DESC;`
+  );
 }
 
 export function updateNote(id: number, content: string) {
   const updatedAt = new Date().toISOString();
   db.runSync(`UPDATE notes SET content = ?, updated_at = ? WHERE id = ?;`, [content, updatedAt, id]);
+}
+
+export function deleteNote(id: number) {
+  db.runSync(`DELETE FROM notes WHERE id = ?;`, [id]);
 }

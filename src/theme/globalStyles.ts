@@ -5,7 +5,7 @@ export const colors = {
   surface: '#1a1a1d',
   text: '#f2f2f2',
   textMuted: '#9a9a9e',
-  accent: '#7c9eff',
+  accent: '#7cebff',
   border: '#2a2a2e',
 };
 
@@ -35,3 +35,7 @@ export const globalStyles = StyleSheet.create({
     color: colors.text,
   },
 });
+
+export const layoutMetrics = {
+  tabBarBaseHeight: 64,
+};

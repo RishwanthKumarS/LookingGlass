@@ -1,6 +1,7 @@
-import { TouchableOpacity, Text, View, StyleSheet, Dimensions } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, Dimensions } from 'react-native';
 import { Note } from '../db/queries/notes';
-import { colors, spacing, fontSize } from '../theme/globalStyles';
+import { useTheme } from '../theme/ThemeContext';
+import { spacing, fontSize } from '../theme/globalStyles';
 
 export type LayoutMode = 'grid2' | 'grid1' | 'compact';
 
@@ -8,6 +9,7 @@ interface Props {
   note: Note;
   layout: LayoutMode;
   onPress: () => void;
+  onLongPress?: () => void;
 }
 
 const screenWidth = Dimensions.get('window').width;
@@ -20,10 +22,60 @@ function formatDate(note: Note) {
   return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 }
 
-export default function NoteCard({ note, layout, onPress }: Props) {
+export default function NoteCard({ note, layout, onPress, onLongPress }: Props) {
+  const { currentTheme } = useTheme();
+
+  const styles = StyleSheet.create({
+    cardGrid2: {
+      width: GRID2_SIZE,
+      height: GRID2_SIZE,
+      backgroundColor: currentTheme.surface,
+      borderRadius: 12,
+      padding: spacing.md,
+      marginBottom: spacing.sm,
+      borderWidth: 1,
+      borderColor: currentTheme.border,
+      flexDirection: 'column',
+    },
+    cardGrid1: {
+      backgroundColor: currentTheme.surface,
+      borderRadius: 12,
+      padding: spacing.md,
+      marginBottom: spacing.sm,
+      minHeight: 80,
+      borderWidth: 1,
+      borderColor: currentTheme.border,
+      flexDirection: 'column',
+    },
+    cardText: {
+      flex: 1,
+      color: currentTheme.text,
+      fontSize: fontSize.sm,
+      overflow: 'hidden',
+    },
+    timeText: {
+      color: currentTheme.textMuted,
+      fontSize: 11,
+      marginTop: spacing.sm,
+    },
+    compactCard: {
+      backgroundColor: currentTheme.surface,
+      borderRadius: 8,
+      paddingVertical: spacing.md,
+      paddingHorizontal: spacing.md,
+      marginBottom: spacing.sm,
+      borderWidth: 1,
+      borderColor: currentTheme.border,
+    },
+    compactText: {
+      color: currentTheme.text,
+      fontSize: fontSize.sm,
+    },
+  });
+
   if (layout === 'compact') {
     return (
-      <TouchableOpacity style={styles.compactCard} onPress={onPress}>
+      <TouchableOpacity style={styles.compactCard} onPress={onPress} onLongPress={onLongPress}>
         <Text style={styles.compactText} numberOfLines={1}>
           {note.content}
         </Text>
@@ -34,7 +86,7 @@ export default function NoteCard({ note, layout, onPress }: Props) {
   const cardStyle = layout === 'grid2' ? styles.cardGrid2 : styles.cardGrid1;
 
   return (
-    <TouchableOpacity style={cardStyle} onPress={onPress}>
+    <TouchableOpacity style={cardStyle} onPress={onPress} onLongPress={onLongPress}>
       <Text style={styles.cardText} numberOfLines={layout === 'grid2' ? undefined : 4}>
         {note.content}
       </Text>
@@ -42,51 +94,3 @@ export default function NoteCard({ note, layout, onPress }: Props) {
     </TouchableOpacity>
   );
 }
-
-const styles = StyleSheet.create({
-  cardGrid2: {
-    width: GRID2_SIZE,
-    height: GRID2_SIZE,
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    padding: spacing.md,
-    marginBottom: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-    flexDirection: 'column',
-  },
-  cardGrid1: {
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    padding: spacing.md,
-    marginBottom: spacing.sm,
-    minHeight: 80,
-    borderWidth: 1,
-    borderColor: colors.border,
-    flexDirection: 'column',
-  },
-  cardText: {
-    flex: 1,
-    color: colors.text,
-    fontSize: fontSize.sm,
-    overflow: 'hidden',
-  },
-  timeText: {
-    color: colors.textMuted,
-    fontSize: 11,
-    marginTop: spacing.sm,
-  },
-  compactCard: {
-    backgroundColor: colors.surface,
-    borderRadius: 8,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-    marginBottom: spacing.sm / 2,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  compactText: {
-    color: colors.text,
-    fontSize: fontSize.sm,
-  },
-});
