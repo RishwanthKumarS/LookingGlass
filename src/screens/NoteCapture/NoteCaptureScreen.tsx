@@ -3,7 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet } from 'r
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { addNote, getAllNotes, deleteNote, Note } from '../../db/queries/notes';
-import { getSetting, setSetting } from '../../db/queries/settings';
+import { useSettings } from '../../theme/SettingsContext';
 import DeleteConfirmModal from '../../components/DeleteConfirmModal';
 import { spacing, fontSize } from '../../theme/globalStyles';
 import { useTheme } from '../../theme/ThemeContext';
@@ -19,7 +19,8 @@ export default function NoteCaptureScreen() {
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [noteToDelete, setNoteToDelete] = useState<Note | null>(null);
   const { currentTheme } = useTheme();
-  
+  const { confirmDelete, setConfirmDelete } = useSettings();
+
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -91,8 +92,7 @@ export default function NoteCaptureScreen() {
   };
 
   const handleLongPress = (note: Note) => {
-    const skipConfirm = getSetting('confirmDelete') === 'false';
-    if (skipConfirm) {
+    if (!confirmDelete) {
       deleteNote(note.id);
       loadNotes();
     } else {
@@ -104,12 +104,13 @@ export default function NoteCaptureScreen() {
     if (noteToDelete) {
       deleteNote(noteToDelete.id);
       if (dontAskAgain) {
-        setSetting('confirmDelete', 'false');
+        setConfirmDelete(false);
       }
       setNoteToDelete(null);
       loadNotes();
     }
   };
+  
   const numColumns = layout === 'grid2' ? 2 : 1;
 
   return (

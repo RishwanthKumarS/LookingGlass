@@ -1,6 +1,5 @@
 import { useRef, useState, useEffect } from 'react';
 import {
-  Modal,
   View,
   Text,
   TouchableOpacity,
@@ -8,30 +7,96 @@ import {
   StyleSheet,
   PanResponder,
   Animated,
+  Dimensions,
+  Switch,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../theme/ThemeContext';
-import { getSetting, setSetting } from '../db/queries/settings';
 import { spacing, fontSize } from '../theme/globalStyles';
+import { useTheme } from '../theme/ThemeContext';
+import { useSettings } from '../theme/SettingsContext';
 import ThemesModal from './ThemesModal';
-import { Switch } from 'react-native';
 
 interface Props {
   visible: boolean;
   onClose: () => void;
 }
 
+const screenHeight = Dimensions.get('window').height;
+const SHEET_HEIGHT = screenHeight * 0.88;
+
 export default function SettingsModal({ visible, onClose }: Props) {
   const { currentTheme } = useTheme();
+  const { confirmDelete, setConfirmDelete } = useSettings();
+  const [themesVisible, setThemesVisible] = useState(false);
+  const [modalRendered, setModalRendered] = useState(false);
+
+  const translateY = useRef(new Animated.Value(SHEET_HEIGHT)).current;
+
+  useEffect(() => {
+    if (visible) {
+      setModalRendered(true);
+      translateY.setValue(SHEET_HEIGHT);
+      Animated.spring(translateY, {
+        toValue: 0,
+        friction: 8,
+        tension: 65,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [visible]);
+
+  const closeAnimated = () => {
+    Animated.timing(translateY, {
+      toValue: SHEET_HEIGHT,
+      duration: 220,
+      useNativeDriver: true,
+    }).start(() => {
+      setModalRendered(false);
+      onClose();
+    });
+  };
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (_, gesture) => Math.abs(gesture.dy) > 5,
+      onPanResponderMove: (_, gesture) => {
+        if (gesture.dy > 0) {
+          translateY.setValue(gesture.dy);
+        }
+      },
+      onPanResponderRelease: (_, gesture) => {
+        if (gesture.dy > 100) {
+          closeAnimated();
+        } else {
+          Animated.spring(translateY, {
+            toValue: 0,
+            friction: 8,
+            tension: 65,
+            useNativeDriver: true,
+          }).start();
+        }
+      },
+    })
+  ).current;
+
+  const overlayOpacity = translateY.interpolate({
+    inputRange: [0, SHEET_HEIGHT],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
 
   const styles = StyleSheet.create({
     overlay: {
       flex: 1,
-      backgroundColor: 'rgba(0,0,0,0.5)',
       justifyContent: 'flex-end',
     },
+    backdrop: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+    },
     sheet: {
-      height: '88%',
+      height: SHEET_HEIGHT,
       backgroundColor: currentTheme.surface,
       borderTopLeftRadius: 24,
       borderTopRightRadius: 24,
@@ -86,52 +151,20 @@ export default function SettingsModal({ visible, onClose }: Props) {
     },
   });
 
-  const [confirmDelete, setConfirmDelete] = useState(() => getSetting('confirmDelete') !== 'false');
-
-  const handleToggleConfirmDelete = (value: boolean) => {
-    setConfirmDelete(value);
-    setSetting('confirmDelete', value ? 'true' : 'false');
-  };
-
-  const translateY = useRef(new Animated.Value(0)).current;
-  const [themesVisible, setThemesVisible] = useState(false);
-
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: (_, gesture) => Math.abs(gesture.dy) > 5,
-      onPanResponderMove: (_, gesture) => {
-        if (gesture.dy > 0) {
-          translateY.setValue(gesture.dy);
-        }
-      },
-      onPanResponderRelease: (_, gesture) => {
-        if (gesture.dy > 100) {
-          onClose();
-        }
-        Animated.spring(translateY, {
-          toValue: 0,
-          useNativeDriver: true,
-        }).start();
-      },
-    })
-  ).current;
-
-  useEffect(() => {
-    if (visible) {
-      translateY.setValue(0);
-    }
-  }, [visible]);
+  if (!modalRendered) return null;
 
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <View style={styles.overlay}>
+    <View style={StyleSheet.absoluteFillObject} pointerEvents="box-none">
+      <View style={styles.overlay} pointerEvents="auto">
+        <Animated.View style={[styles.backdrop, { opacity: overlayOpacity }]} />
+        <TouchableOpacity style={StyleSheet.absoluteFill} activeOpacity={1} onPress={closeAnimated} />
+
         <Animated.View style={[styles.sheet, { transform: [{ translateY }] }]}>
           <View {...panResponder.panHandlers}>
             <View style={styles.dragHandle} />
             <View style={styles.headerRow}>
               <Text style={styles.title}>Settings</Text>
-              <TouchableOpacity onPress={onClose}>
+              <TouchableOpacity onPress={closeAnimated}>
                 <Ionicons name="close" size={26} color={currentTheme.text} />
               </TouchableOpacity>
             </View>
@@ -155,7 +188,7 @@ export default function SettingsModal({ visible, onClose }: Props) {
               <Text style={styles.rowText}>Ask before deleting notes</Text>
               <Switch
                 value={confirmDelete}
-                onValueChange={handleToggleConfirmDelete}
+                onValueChange={setConfirmDelete}
                 trackColor={{ false: currentTheme.border, true: currentTheme.accent }}
                 thumbColor={currentTheme.text}
               />
@@ -175,6 +208,6 @@ export default function SettingsModal({ visible, onClose }: Props) {
       </View>
 
       <ThemesModal visible={themesVisible} onClose={() => setThemesVisible(false)} />
-    </Modal>
+    </View>
   );
 }

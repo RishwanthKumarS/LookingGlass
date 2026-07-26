@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import {
-  Modal,
   View,
   Text,
   TouchableOpacity,
@@ -41,7 +40,6 @@ export default function NoteModal({ note, visible, onClose, onUpdated }: Props) 
   const styles = StyleSheet.create({
     overlay: {
       flex: 1,
-      backgroundColor: 'rgba(0,0,0,0.6)',
       justifyContent: 'center',
       alignItems: 'center',
     },
@@ -81,6 +79,9 @@ export default function NoteModal({ note, visible, onClose, onUpdated }: Props) 
       lineHeight: 22,
       marginTop: spacing.lg,
       textAlignVertical: 'top',
+      padding: 0,
+      paddingTop: 0,
+      includeFontPadding: false,
     },
     footerRow: {
       flexDirection: 'row',
@@ -130,7 +131,7 @@ export default function NoteModal({ note, visible, onClose, onUpdated }: Props) 
     }
   }, [visible]);
 
-  if (!note) return null;
+  if (!note || !visible) return null;
 
   const handleSaveEdit = () => {
     if (draft.trim().length === 0) return;
@@ -141,12 +142,26 @@ export default function NoteModal({ note, visible, onClose, onUpdated }: Props) 
 
   const handleClose = () => {
     setIsEditing(false);
-    onClose();
+    Animated.parallel([
+      Animated.spring(scale, {
+        toValue: 0.85,
+        friction: 6,
+        tension: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(opacity, {
+        toValue: 0,
+        duration: 120,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      onClose();
+    });
   };
 
   return (
-    <Modal visible={visible} animationType="none" transparent onRequestClose={handleClose}>
-      <Animated.View style={[styles.overlay, { opacity }]}>
+    <View style={StyleSheet.absoluteFillObject} pointerEvents="box-none">
+      <Animated.View style={[styles.overlay, { opacity, backgroundColor: 'rgba(0,0,0,0.6)' }]}>
         <TouchableOpacity
           style={StyleSheet.absoluteFill}
           activeOpacity={1}
@@ -185,6 +200,6 @@ export default function NoteModal({ note, visible, onClose, onUpdated }: Props) 
           </View>
         </Animated.View>
       </Animated.View>
-    </Modal>
+    </View>
   );
 }

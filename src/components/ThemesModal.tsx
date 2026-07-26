@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
 import {
-  Modal,
   View,
   Text,
   TouchableOpacity,
@@ -8,6 +7,7 @@ import {
   StyleSheet,
   PanResponder,
   Animated,
+  Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { spacing, fontSize } from '../theme/globalStyles';
@@ -21,9 +21,10 @@ import {
   markPurchased,
 } from '../theme/trialManager';
 import TrialConfirmModal from './TrialConfirmModal';
-import { Dimensions } from 'react-native';
 
 const screenWidth = Dimensions.get('window').width;
+const screenHeight = Dimensions.get('window').height;
+const SHEET_HEIGHT = screenHeight * 0.88;
 const THEME_GRID_GAP = spacing.sm;
 const THEME_SHEET_PADDING = spacing.lg;
 const THEME_CARD_SIZE = (screenWidth - THEME_SHEET_PADDING * 2 - THEME_GRID_GAP) / 2;
@@ -43,9 +44,11 @@ function formatHMS(totalSeconds: number) {
 
 export default function ThemesModal({ visible, onClose }: Props) {
   const { currentTheme, selectTheme } = useTheme();
-  const translateY = useRef(new Animated.Value(0)).current;
   const [confirmTheme, setConfirmTheme] = useState<ThemePreview | null>(null);
   const [tick, setTick] = useState(0);
+  const [modalRendered, setModalRendered] = useState(false);
+
+  const translateY = useRef(new Animated.Value(SHEET_HEIGHT)).current;
 
   useEffect(() => {
     if (!visible) return;
@@ -54,8 +57,28 @@ export default function ThemesModal({ visible, onClose }: Props) {
   }, [visible]);
 
   useEffect(() => {
-    if (visible) translateY.setValue(0);
+    if (visible) {
+      setModalRendered(true);
+      translateY.setValue(SHEET_HEIGHT);
+      Animated.spring(translateY, {
+        toValue: 0,
+        friction: 8,
+        tension: 65,
+        useNativeDriver: true,
+      }).start();
+    }
   }, [visible]);
+
+  const closeAnimated = () => {
+    Animated.timing(translateY, {
+      toValue: SHEET_HEIGHT,
+      duration: 220,
+      useNativeDriver: true,
+    }).start(() => {
+      setModalRendered(false);
+      onClose();
+    });
+  };
 
   const panResponder = useRef(
     PanResponder.create({
@@ -65,11 +88,20 @@ export default function ThemesModal({ visible, onClose }: Props) {
         if (g.dy > 0) translateY.setValue(g.dy);
       },
       onPanResponderRelease: (_, g) => {
-        if (g.dy > 100) onClose();
-        Animated.spring(translateY, { toValue: 0, useNativeDriver: true }).start();
+        if (g.dy > 100) {
+          closeAnimated();
+        } else {
+          Animated.spring(translateY, { toValue: 0, friction: 8, tension: 65, useNativeDriver: true }).start();
+        }
       },
     })
   ).current;
+
+  const overlayOpacity = translateY.interpolate({
+    inputRange: [0, SHEET_HEIGHT],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
 
   const handleCardPress = (theme: ThemePreview) => {
     if (!theme.isPremium) {
@@ -92,11 +124,14 @@ export default function ThemesModal({ visible, onClose }: Props) {
   const styles = StyleSheet.create({
     overlay: {
       flex: 1,
-      backgroundColor: 'rgba(0,0,0,0.5)',
       justifyContent: 'flex-end',
     },
+    backdrop: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+    },
     sheet: {
-      height: '88%',
+      height: SHEET_HEIGHT,
       backgroundColor: currentTheme.surface,
       borderTopLeftRadius: 24,
       borderTopRightRadius: 24,
@@ -115,14 +150,19 @@ export default function ThemesModal({ visible, onClose }: Props) {
     },
   });
 
+  if (!modalRendered) return null;
+
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <View style={styles.overlay}>
+    <View style={StyleSheet.absoluteFillObject} pointerEvents="box-none">
+      <View style={styles.overlay} pointerEvents="auto">
+        <Animated.View style={[styles.backdrop, { opacity: overlayOpacity }]} />
+        <TouchableOpacity style={StyleSheet.absoluteFill} activeOpacity={1} onPress={closeAnimated} />
+
         <Animated.View style={[styles.sheet, { transform: [{ translateY }] }]}>
           <View {...panResponder.panHandlers}>
             <View style={styles.headerRow}>
               <Text style={styles.title}>Themes</Text>
-              <TouchableOpacity onPress={onClose}>
+              <TouchableOpacity onPress={closeAnimated}>
                 <Ionicons name="close" size={26} color={currentTheme.text} />
               </TouchableOpacity>
             </View>
@@ -163,7 +203,7 @@ export default function ThemesModal({ visible, onClose }: Props) {
           setConfirmTheme(null);
         }}
       />
-    </Modal>
+    </View>
   );
 }
 

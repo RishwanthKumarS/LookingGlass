@@ -1,7 +1,6 @@
-import { Modal, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 import { spacing, fontSize } from '../theme/globalStyles';
-
 import { ThemePreview } from '../theme/themeData';
 
 interface Props {
@@ -19,74 +18,76 @@ export default function TrialConfirmModal({
   onStartTrial,
   onPurchase,
 }: Props) {
-  if (!theme) return null;
   const { currentTheme } = useTheme();
 
   const styles = StyleSheet.create({
     overlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.6)',
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: spacing.lg,
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.6)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: spacing.lg,
     },
     card: {
-        width: '100%',
-        backgroundColor: currentTheme.surface,
-        borderRadius: 16,
-        padding: spacing.lg,
-        borderWidth: 1,
-        borderColor: currentTheme.border,
+      width: '100%',
+      backgroundColor: currentTheme.surface,
+      borderRadius: 16,
+      padding: spacing.lg,
+      borderWidth: 1,
+      borderColor: currentTheme.border,
     },
     title: {
-        color: currentTheme.text,
-        fontSize: fontSize.lg,
-        fontWeight: '700',
-        marginBottom: spacing.sm,
+      color: currentTheme.text,
+      fontSize: fontSize.lg,
+      fontWeight: '700',
+      marginBottom: spacing.sm,
     },
     body: {
-        color: currentTheme.textMuted,
-        fontSize: fontSize.sm,
-        lineHeight: 20,
-        marginBottom: spacing.lg,
+      color: currentTheme.textMuted,
+      fontSize: fontSize.sm,
+      lineHeight: 20,
+      marginBottom: spacing.lg,
     },
     primaryButton: {
-        backgroundColor: currentTheme.accent,
-        borderRadius: 10,
-        paddingVertical: spacing.md,
-        alignItems: 'center',
-        marginBottom: spacing.sm,
+      backgroundColor: currentTheme.accent,
+      borderRadius: 10,
+      paddingVertical: spacing.md,
+      alignItems: 'center',
+      marginBottom: spacing.sm,
     },
     primaryButtonText: {
-        color: currentTheme.background,
-        fontWeight: '700',
-        fontSize: fontSize.md,
+      color: currentTheme.background,
+      fontWeight: '700',
+      fontSize: fontSize.md,
     },
     secondaryButton: {
-        backgroundColor: currentTheme.background,
-        borderRadius: 10,
-        paddingVertical: spacing.md,
-        alignItems: 'center',
-        marginBottom: spacing.sm,
-        borderWidth: 1,
-        borderColor: currentTheme.border,
+      backgroundColor: currentTheme.background,
+      borderRadius: 10,
+      paddingVertical: spacing.md,
+      alignItems: 'center',
+      marginBottom: spacing.sm,
+      borderWidth: 1,
+      borderColor: currentTheme.border,
     },
     secondaryButtonText: {
-        color: currentTheme.text,
-        fontWeight: '600',
-        fontSize: fontSize.md,
+      color: currentTheme.text,
+      fontWeight: '600',
+      fontSize: fontSize.md,
     },
     cancelButton: {
-        alignItems: 'center',
-        paddingVertical: spacing.sm,
+      alignItems: 'center',
+      paddingVertical: spacing.sm,
     },
     cancelButtonText: {
-        color: currentTheme.textMuted,
-        fontSize: fontSize.sm,
+      color: currentTheme.textMuted,
+      fontSize: fontSize.sm,
     },
-    });
+  });
+
+  if (!theme || !visible) return null;
+
   return (
-    <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
+    <View style={StyleSheet.absoluteFillObject} pointerEvents="box-none">
       <View style={styles.overlay}>
         <TouchableOpacity style={StyleSheet.absoluteFill} activeOpacity={1} onPress={onClose} />
         <View style={styles.card}>
@@ -108,6 +109,6 @@ export default function TrialConfirmModal({
           </TouchableOpacity>
         </View>
       </View>
-    </Modal>
+    </View>
   );
 }

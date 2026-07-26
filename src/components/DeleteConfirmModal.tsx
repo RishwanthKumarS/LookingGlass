@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Modal, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useState, useRef, useEffect } from 'react';
+import { Modal, View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { spacing, fontSize } from '../theme/globalStyles';
 import { useTheme } from '../theme/ThemeContext';
@@ -14,10 +14,52 @@ export default function DeleteConfirmModal({ visible, onCancel, onConfirm }: Pro
   const { currentTheme } = useTheme();
   const [dontAskAgain, setDontAskAgain] = useState(false);
 
+  const scale = useRef(new Animated.Value(0.85)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (visible) {
+      setDontAskAgain(false);
+      scale.setValue(0.85);
+      opacity.setValue(0);
+      Animated.parallel([
+        Animated.spring(scale, {
+          toValue: 1,
+          friction: 5,
+          tension: 90,
+          useNativeDriver: true,
+        }),
+        Animated.timing(opacity, {
+          toValue: 1,
+          duration: 120,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [visible]);
+
+  const animateOutThen = (callback: () => void) => {
+    Animated.parallel([
+      Animated.spring(scale, {
+        toValue: 0.85,
+        friction: 6,
+        tension: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(opacity, {
+        toValue: 0,
+        duration: 120,
+        useNativeDriver: true,
+      }),
+    ]).start(() => callback());
+  };
+
+  const handleCancel = () => animateOutThen(onCancel);
+  const handleConfirm = () => animateOutThen(() => onConfirm(dontAskAgain));
+
   const styles = StyleSheet.create({
     overlay: {
       flex: 1,
-      backgroundColor: 'rgba(0,0,0,0.6)',
       justifyContent: 'center',
       alignItems: 'center',
       padding: spacing.lg,
@@ -88,10 +130,10 @@ export default function DeleteConfirmModal({ visible, onCancel, onConfirm }: Pro
   });
 
   return (
-    <Modal visible={visible} animationType="fade" transparent onRequestClose={onCancel}>
-      <View style={styles.overlay}>
-        <TouchableOpacity style={StyleSheet.absoluteFill} activeOpacity={1} onPress={onCancel} />
-        <View style={styles.card}>
+    <Modal visible={visible} animationType="none" transparent onRequestClose={handleCancel}>
+      <Animated.View style={[styles.overlay, { opacity, backgroundColor: 'rgba(0,0,0,0.6)' }]}>
+        <TouchableOpacity style={StyleSheet.absoluteFill} activeOpacity={1} onPress={handleCancel} />
+        <Animated.View style={[styles.card, { transform: [{ scale }] }]}>
           <Text style={styles.title}>Delete Note</Text>
           <Text style={styles.body}>
             This note will be permanently deleted. This can't be undone.
@@ -107,15 +149,15 @@ export default function DeleteConfirmModal({ visible, onCancel, onConfirm }: Pro
             <Text style={styles.checkboxLabel}>Don't ask me again</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.deleteButton} onPress={() => onConfirm(dontAskAgain)}>
+          <TouchableOpacity style={styles.deleteButton} onPress={handleConfirm}>
             <Text style={styles.deleteButtonText}>Delete</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.cancelButton} onPress={onCancel}>
+          <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
             <Text style={styles.cancelButtonText}>Cancel</Text>
           </TouchableOpacity>
-        </View>
-      </View>
+        </Animated.View>
+      </Animated.View>
     </Modal>
   );
 }

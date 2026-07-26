@@ -3,6 +3,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import RootNavigator from './src/navigation/RootNavigator';
 import { ThemeProvider, useTheme } from './src/theme/ThemeContext';
 import './src/db/client'; // Intitialize Database on app start
+import { SettingsProvider } from './src/theme/SettingsContext';
 
 function AppContent() {
   const { currentTheme } = useTheme();
@@ -18,7 +19,9 @@ function AppContent() {
 export default function App() {
   return (
     <ThemeProvider>
-      <AppContent />
+      <SettingsProvider>
+        <AppContent />
+      </SettingsProvider>
     </ThemeProvider>
   );
 }
