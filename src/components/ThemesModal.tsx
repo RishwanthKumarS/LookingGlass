@@ -137,6 +137,14 @@ export default function ThemesModal({ visible, onClose }: Props) {
       borderTopRightRadius: 24,
       padding: spacing.lg,
     },
+    dragHandle: {
+      width: 40,
+      height: 4,
+      borderRadius: 2,
+      backgroundColor: currentTheme.border,
+      alignSelf: 'center',
+      marginBottom: spacing.sm,
+    },
     headerRow: {
       flexDirection: 'row',
       justifyContent: 'space-between',
@@ -160,6 +168,7 @@ export default function ThemesModal({ visible, onClose }: Props) {
 
         <Animated.View style={[styles.sheet, { transform: [{ translateY }] }]}>
           <View {...panResponder.panHandlers}>
+            <View style={styles.dragHandle} />
             <View style={styles.headerRow}>
               <Text style={styles.title}>Themes</Text>
               <TouchableOpacity onPress={closeAnimated}>

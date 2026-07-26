@@ -39,7 +39,7 @@ export default function NoteModal({ note, visible, onClose, onUpdated }: Props) 
 
   const styles = StyleSheet.create({
     overlay: {
-      flex: 1,
+      ...StyleSheet.absoluteFillObject,
       justifyContent: 'center',
       alignItems: 'center',
     },
@@ -100,19 +100,18 @@ export default function NoteModal({ note, visible, onClose, onUpdated }: Props) 
 
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState('');
+  const [displayNote, setDisplayNote] = useState<Note | null>(null);
 
   const scale = useRef(new Animated.Value(0.85)).current;
   const opacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    if (note) {
+    if (visible && note) {
+      setDisplayNote(note);
       setDraft(note.content);
       setIsEditing(false);
-    }
-  }, [note]);
-
-  useEffect(() => {
-    if (visible) {
+      scale.stopAnimation();
+      opacity.stopAnimation();
       scale.setValue(0.85);
       opacity.setValue(0);
       Animated.parallel([
@@ -128,78 +127,81 @@ export default function NoteModal({ note, visible, onClose, onUpdated }: Props) 
           useNativeDriver: true,
         }),
       ]).start();
+    } else if (!visible) {
+      Animated.parallel([
+        Animated.spring(scale, {
+          toValue: 0.85,
+          friction: 6,
+          tension: 100,
+          useNativeDriver: true,
+        }),
+        Animated.timing(opacity, {
+          toValue: 0,
+          duration: 120,
+          useNativeDriver: true,
+        }),
+      ]).start();
     }
-  }, [visible]);
-
-  if (!note || !visible) return null;
+  }, [visible, note]);
 
   const handleSaveEdit = () => {
-    if (draft.trim().length === 0) return;
-    updateNote(note.id, draft.trim());
+    if (!displayNote || draft.trim().length === 0) return;
+    updateNote(displayNote.id, draft.trim());
     setIsEditing(false);
     onUpdated();
   };
 
   const handleClose = () => {
     setIsEditing(false);
-    Animated.parallel([
-      Animated.spring(scale, {
-        toValue: 0.85,
-        friction: 6,
-        tension: 100,
-        useNativeDriver: true,
-      }),
-      Animated.timing(opacity, {
-        toValue: 0,
-        duration: 120,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
-      onClose();
-    });
+    onClose();
   };
 
   return (
-    <View style={StyleSheet.absoluteFillObject} pointerEvents="box-none">
-      <Animated.View style={[styles.overlay, { opacity, backgroundColor: 'rgba(0,0,0,0.6)' }]}>
-        <TouchableOpacity
-          style={StyleSheet.absoluteFill}
-          activeOpacity={1}
-          onPress={handleClose}
-        />
-        <Animated.View style={[styles.sheet, { transform: [{ scale }] }]}>
-          <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
-            <Ionicons name="close" size={22} color={currentTheme.text} />
-          </TouchableOpacity>
-
-          {isEditing ? (
-            <TextInput
-              style={styles.editInput}
-              value={draft}
-              onChangeText={setDraft}
-              multiline
-              autoFocus
-              placeholderTextColor={currentTheme.textMuted}
-            />
-          ) : (
-            <ScrollView style={styles.scrollArea} contentContainerStyle={{ paddingTop: spacing.lg }}>
-              {note.subject && <Text style={styles.subject}>{note.subject}</Text>}
-              <Text style={styles.content}>{note.content}</Text>
-            </ScrollView>
-          )}
-
-          <View style={styles.footerRow}>
-            <Text style={styles.meta}>{formatDateTime(note)}</Text>
-            <TouchableOpacity onPress={() => (isEditing ? handleSaveEdit() : setIsEditing(true))}>
-              <Ionicons
-                name={isEditing ? 'checkmark-outline' : 'create-outline'}
-                size={22}
-                color={currentTheme.accent}
-              />
+    <Animated.View
+      style={[styles.overlay, { opacity, backgroundColor: 'rgba(0,0,0,0.6)' }]}
+      pointerEvents={visible ? 'auto' : 'none'}
+    >
+      <TouchableOpacity
+        style={StyleSheet.absoluteFill}
+        activeOpacity={1}
+        onPress={handleClose}
+      />
+      <Animated.View style={[styles.sheet, { transform: [{ scale }] }]}>
+        {displayNote && (
+          <>
+            <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
+              <Ionicons name="close" size={22} color={currentTheme.text} />
             </TouchableOpacity>
-          </View>
-        </Animated.View>
+
+            {isEditing ? (
+              <TextInput
+                style={styles.editInput}
+                value={draft}
+                onChangeText={setDraft}
+                multiline
+                autoFocus
+                placeholderTextColor={currentTheme.textMuted}
+              />
+            ) : (
+              <ScrollView style={styles.scrollArea} contentContainerStyle={{ paddingTop: spacing.lg }}>
+                {displayNote.subject && <Text style={styles.subject}>{displayNote.subject}</Text>}
+                <Text style={styles.content}>{displayNote.content}</Text>
+              </ScrollView>
+            )}
+
+            <View style={styles.footerRow}>
+              <Text style={styles.meta}>{formatDateTime(displayNote)}</Text>
+              <TouchableOpacity onPress={() => (isEditing ? handleSaveEdit() : setIsEditing(true))}>
+                <Ionicons
+                  name={isEditing ? 'checkmark-outline' : 'create-outline'}
+                  size={22}
+                  color={currentTheme.accent}
+                />
+              </TouchableOpacity>
+            </View>
+          </>
+        )}
       </Animated.View>
-    </View>
+    </Animated.View>
   );
 }
