@@ -24,9 +24,16 @@ interface Props {
 const screenHeight = Dimensions.get('window').height;
 const SHEET_HEIGHT = screenHeight * 0.88;
 
+const BLUR_PRESETS: { label: string; value: number }[] = [
+  { label: 'Off', value: 0 },
+  { label: 'Light', value: 1 },
+  { label: 'Medium', value: 2.5 },
+  { label: 'Strong', value: 5 },
+];
+
 export default function SettingsModal({ visible, onClose }: Props) {
   const { currentTheme } = useTheme();
-  const { confirmDelete, setConfirmDelete } = useSettings();
+  const { confirmDelete, setConfirmDelete, backgroundBlur, setBackgroundBlur } = useSettings();
   const [themesVisible, setThemesVisible] = useState(false);
   const [modalRendered, setModalRendered] = useState(false);
 
@@ -149,6 +156,48 @@ export default function SettingsModal({ visible, onClose }: Props) {
       color: currentTheme.text,
       fontSize: fontSize.md,
     },
+    blurRow: {
+      flexDirection: 'column',
+      alignItems: 'stretch',
+      backgroundColor: currentTheme.background,
+      borderRadius: 10,
+      paddingVertical: spacing.md,
+      paddingHorizontal: spacing.md,
+      marginBottom: spacing.sm,
+      borderWidth: 1,
+      borderColor: currentTheme.border,
+    },
+    blurRowTop: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: spacing.sm,
+    },
+    presetGroup: {
+      flexDirection: 'row',
+      gap: spacing.sm / 2,
+    },
+    presetButton: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: spacing.sm / 2,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: currentTheme.border,
+    },
+    presetButtonActive: {
+      backgroundColor: currentTheme.accent,
+      borderColor: currentTheme.accent,
+    },
+    presetButtonText: {
+      color: currentTheme.textMuted,
+      fontSize: fontSize.sm,
+      fontWeight: '600',
+    },
+    presetButtonTextActive: {
+      color: currentTheme.background,
+    },
   });
 
   if (!modalRendered) return null;
@@ -176,6 +225,33 @@ export default function SettingsModal({ visible, onClose }: Props) {
               <Text style={styles.rowText}>Theme</Text>
               <Ionicons name="chevron-forward" size={18} color={currentTheme.textMuted} />
             </TouchableOpacity>
+
+            <View style={styles.blurRow}>
+              <View style={styles.blurRowTop}>
+                <Text style={styles.rowText}>Background Blur</Text>
+              </View>
+              <View style={styles.presetGroup}>
+                {BLUR_PRESETS.map((preset) => {
+                  const isActive = backgroundBlur === preset.value;
+                  return (
+                    <TouchableOpacity
+                      key={preset.label}
+                      style={[styles.presetButton, isActive && styles.presetButtonActive]}
+                      onPress={() => setBackgroundBlur(preset.value)}
+                    >
+                      <Text
+                        style={[
+                          styles.presetButtonText,
+                          isActive && styles.presetButtonTextActive,
+                        ]}
+                      >
+                        {preset.label}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </View>
 
             <Text style={styles.sectionLabel}>Reminders</Text>
             <TouchableOpacity style={styles.row}>

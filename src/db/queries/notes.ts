@@ -11,13 +11,14 @@ export interface Note {
   next_review_date: string | null;
 }
 
-export function addNote(content: string, subject: string | null = null) {
+export function addNote(content: string, subject: string | null = null): number {
   const createdAt = new Date().toISOString();
-  db.runSync(
+  const result = db.runSync(
     `INSERT INTO notes (content, subject, created_at, status, review_count, next_review_date)
      VALUES (?, ?, ?, 'active', 0, NULL);`,
     [content, subject, createdAt]
   );
+  return result.lastInsertRowId;
 }
 
 export function getAllNotes(): Note[] {

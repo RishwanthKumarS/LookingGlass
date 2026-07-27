@@ -13,6 +13,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { Note, updateNote } from '../db/queries/notes';
 import { useTheme } from '../theme/ThemeContext';
 import { spacing, fontSize } from '../theme/globalStyles';
+import { getAttachmentsForNote, Attachment } from '../db/queries/attachments';
+import { Image } from 'react-native';
 
 interface Props {
   note: Note | null;
@@ -105,6 +107,14 @@ export default function NoteModal({ note, visible, onClose, onUpdated }: Props) 
   const scale = useRef(new Animated.Value(0.85)).current;
   const opacity = useRef(new Animated.Value(0)).current;
 
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
+
+  useEffect(() => {
+    if (displayNote) {
+      setAttachments(getAttachmentsForNote(displayNote.id));
+    }
+  }, [displayNote]);
+
   useEffect(() => {
     if (visible && note) {
       setDisplayNote(note);
@@ -186,6 +196,37 @@ export default function NoteModal({ note, visible, onClose, onUpdated }: Props) 
               <ScrollView style={styles.scrollArea} contentContainerStyle={{ paddingTop: spacing.lg }}>
                 {displayNote.subject && <Text style={styles.subject}>{displayNote.subject}</Text>}
                 <Text style={styles.content}>{displayNote.content}</Text>
+                {attachments.length > 0 && (
+                  <View style={{ marginTop: spacing.md, gap: spacing.sm }}>
+                    {attachments.map((att) =>
+                      att.type === 'image' ? (
+                        <Image
+                          key={att.id}
+                          source={{ uri: att.uri }}
+                          style={{ width: '100%', height: 160, borderRadius: 8 }}
+                          resizeMode="cover"
+                        />
+                      ) : (
+                        <View
+                          key={att.id}
+                          style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            gap: spacing.sm,
+                            backgroundColor: currentTheme.background,
+                            padding: spacing.sm,
+                            borderRadius: 8,
+                          }}
+                        >
+                          <Ionicons name="document-outline" size={18} color={currentTheme.textMuted} />
+                          <Text style={{ color: currentTheme.text, fontSize: fontSize.sm }} numberOfLines={1}>
+                            {att.filename}
+                          </Text>
+                        </View>
+                      )
+                    )}
+                  </View>
+                )}
               </ScrollView>
             )}
 

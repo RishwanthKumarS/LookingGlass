@@ -25,6 +25,7 @@ export default function TabNavigator() {
         tabBarIndicatorStyle: { backgroundColor: currentTheme.accent, top: 0, height: 2 },
         tabBarStyle: {
             backgroundColor: currentTheme.surface,
+            opacity: 0.7,
             borderTopColor: currentTheme.border,
             borderTopWidth: 1,
             height: layoutMetrics.tabBarBaseHeight + insets.bottom,
@@ -33,6 +34,9 @@ export default function TabNavigator() {
         },
         tabBarItemStyle: {
             paddingVertical: 2,
+        },
+        sceneStyle: {
+            backgroundColor: 'transparent',
         },
         tabBarActiveTintColor: currentTheme.accent,
         tabBarInactiveTintColor: currentTheme.textMuted,

@@ -30,6 +30,7 @@ export default function NoteCard({ note, layout, onPress, onLongPress }: Props) 
       width: GRID2_SIZE,
       height: GRID2_SIZE,
       backgroundColor: currentTheme.surface,
+      opacity: 0.7,
       borderRadius: 12,
       padding: spacing.md,
       marginBottom: spacing.sm,
@@ -39,6 +40,7 @@ export default function NoteCard({ note, layout, onPress, onLongPress }: Props) 
     },
     cardGrid1: {
       backgroundColor: currentTheme.surface,
+      opacity: 0.7,
       borderRadius: 12,
       padding: spacing.md,
       marginBottom: spacing.sm,
@@ -60,6 +62,7 @@ export default function NoteCard({ note, layout, onPress, onLongPress }: Props) 
     },
     compactCard: {
       backgroundColor: currentTheme.surface,
+      opacity: 0.7,
       borderRadius: 8,
       paddingVertical: spacing.md,
       paddingHorizontal: spacing.md,

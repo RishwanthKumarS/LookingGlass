@@ -1,3 +1,5 @@
+import { ImageSourcePropType } from 'react-native';
+
 export interface ThemePreview {
   id: string;
   name: string;
@@ -9,6 +11,7 @@ export interface ThemePreview {
   border: string;
   isPremium: boolean;
   trialHours: number;
+  backgroundImage?: ImageSourcePropType | null;
 }
 
 export const builtInThemes: ThemePreview[] = [
@@ -73,6 +76,31 @@ export const builtInThemes: ThemePreview[] = [
     trialHours: 0,
   },
   {
+    id: 'underwater',
+    name: 'Underwater',
+    background: '#071a24',
+    surface: '#0f2a38',
+    accent: '#3ec9f0',
+    text: '#e4f6fc',
+    textMuted: '#7ba7b8',
+    border: '#164256',
+    isPremium: true,
+    trialHours: 12,
+    backgroundImage: require('../../assets/images/underwater.jpg'),
+  },
+  {
+    id: 'warmth',
+    name: 'Warmth',
+    background: '#1a0a06',
+    surface: '#2b120a',
+    accent: '#ff5a2e',
+    text: '#fbe8e0',
+    textMuted: '#b08172',
+    border: '#3d1c10',
+    isPremium: false,
+    trialHours: 0,
+  },
+  {
     id: 'campfire',
     name: 'Campfire',
     background: '#1a0a06',
@@ -81,6 +109,19 @@ export const builtInThemes: ThemePreview[] = [
     text: '#fbe8e0',
     textMuted: '#b08172',
     border: '#3d1c10',
+    isPremium: true,
+    trialHours: 12,
+    backgroundImage: require('../../assets/images/campfire.jpg'),
+  },
+  {
+    id: 'gale',
+    name: 'Gale',
+    background: '#eef4f2',
+    surface: '#dfeae6',
+    accent: '#4fb59a',
+    text: '#233631',
+    textMuted: '#6f8b83',
+    border: '#c6d9d3',
     isPremium: false,
     trialHours: 0,
   },
@@ -93,6 +134,19 @@ export const builtInThemes: ThemePreview[] = [
     text: '#233631',
     textMuted: '#6f8b83',
     border: '#c6d9d3',
+    isPremium: true,
+    trialHours: 12,
+    backgroundImage: require('../../assets/images/breeze.jpg'),
+  },
+  {
+    id: 'soil',
+    name: 'Soil',
+    background: '#1c1712',
+    surface: '#2b241c',
+    accent: '#b3833f',
+    text: '#ece2d2',
+    textMuted: '#96876f',
+    border: '#3d3325',
     isPremium: false,
     trialHours: 0,
   },
@@ -105,8 +159,9 @@ export const builtInThemes: ThemePreview[] = [
     text: '#ece2d2',
     textMuted: '#96876f',
     border: '#3d3325',
-    isPremium: false,
-    trialHours: 0,
+    isPremium: true,
+    trialHours: 12,
+    backgroundImage: require('../../assets/images/earth.jpg'),
   },
   {
     id: 'astro',
@@ -121,6 +176,19 @@ export const builtInThemes: ThemePreview[] = [
     trialHours: 0,
   },
   {
+    id: 'galaxy',
+    name: 'Galaxy',
+    background: '#0b0c1e',
+    surface: '#151833',
+    accent: '#8b7fff',
+    text: '#e6e4ff',
+    textMuted: '#7d7aa8',
+    border: '#242850',
+    isPremium: true,
+    trialHours: 12,
+    backgroundImage: require('../../assets/images/galaxy.jpg'),
+  },
+  {
     id: 'nature',
     name: 'Nature',
     background: '#f1f6ee',
@@ -133,6 +201,19 @@ export const builtInThemes: ThemePreview[] = [
     trialHours: 0,
   },
   {
+    id: 'dewdrop',
+    name: 'Dewdrop',
+    background: '#f1f6ee',
+    surface: '#e1ebd9',
+    accent: '#6a9955',
+    text: '#2c3826',
+    textMuted: '#7d8f70',
+    border: '#cfe0c2',
+    isPremium: false,
+    trialHours: 0,
+    backgroundImage: require('../../assets/images/dewdrop.jpg'),
+  },
+  {
     id: 'abyss',
     name: 'Abyss',
     background: '#0c0e12',
@@ -141,8 +222,21 @@ export const builtInThemes: ThemePreview[] = [
     text: '#dde3ec',
     textMuted: '#6b7684',
     border: '#232a36',
+    isPremium: false,
+    trialHours: 0,
+  },
+  {
+    id: 'hadal',
+    name: 'Hadal',
+    background: '#0c0e12',
+    surface: '#161a22',
+    accent: '#3a6fd8',
+    text: '#dde3ec',
+    textMuted: '#6b7684',
+    border: '#232a36',
     isPremium: true,
     trialHours: 12,
+    backgroundImage: require('../../assets/images/hadal.jpg'),
   },
   {
     id: 'seafoam',
@@ -193,8 +287,8 @@ export const builtInThemes: ThemePreview[] = [
     trialHours: 12,
   },
   {
-    id: 'chesire',
-    name: 'Chesire',
+    id: 'cheshire',
+    name: 'Cheshire',
     background: '#241a2e',
     surface: '#3a2748',
     accent: '#d977c9',
@@ -241,8 +335,8 @@ export const builtInThemes: ThemePreview[] = [
     trialHours: 12,
   },
   {
-    id: 'retro-light',
-    name: 'Retro Light',
+    id: 'retro',
+    name: 'Retro',
     background: '#fdf3e3',
     surface: '#f7e3c4',
     accent: '#e0633f',
@@ -251,18 +345,7 @@ export const builtInThemes: ThemePreview[] = [
     border: '#e8d3a8',
     isPremium: true,
     trialHours: 12,
-  },
-  {
-    id: 'retro-dark',
-    name: 'Retro Dark',
-    background: '#171412',
-    surface: '#2b241f',
-    accent: '#e0955f',
-    text: '#f0e6d8',
-    textMuted: '#a89a86',
-    border: '#3d342c',
-    isPremium: true,
-    trialHours: 12,
+    backgroundImage: require('../../assets/images/retro.jpg'),
   },
   {
     id: 'cyberpunk',
@@ -275,10 +358,11 @@ export const builtInThemes: ThemePreview[] = [
     border: '#2e1a44',
     isPremium: true,
     trialHours: 12,
+    backgroundImage: require('../../assets/images/cyberpunk.jpg'),
   },
   {
-    id: 'terminal',
-    name: 'Terminal',
+    id: 'neo',
+    name: 'Neo',
     background: '#0a0f0a',
     surface: '#0f170f',
     accent: '#39ff6a',
@@ -287,5 +371,6 @@ export const builtInThemes: ThemePreview[] = [
     border: '#1c2c1c',
     isPremium: true,
     trialHours: 12,
+    backgroundImage: require('../../assets/images/neo.jpg'),
   },
 ];

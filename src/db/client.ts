@@ -34,6 +34,16 @@ export function initDatabase() {
       key TEXT PRIMARY KEY,
       value TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS attachments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      note_id INTEGER NOT NULL,
+      type TEXT NOT NULL,
+      uri TEXT NOT NULL,
+      filename TEXT,
+      created_at TEXT NOT NULL,
+      FOREIGN KEY (note_id) REFERENCES notes (id)
+    );
   `);
 
   try {

@@ -1,21 +1,38 @@
 import { useState } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
-import { TouchableOpacity, View, Text } from 'react-native';
+import { TouchableOpacity, View, Text, ImageBackground, StyleSheet } from 'react-native';
+import { BlurView } from 'expo-blur';
 
 import TabNavigator from './TabNavigator';
 import SettingsModal from '../components/SettingsModal';
 import { useTheme } from '../theme/ThemeContext';
+import { useSettings } from '../theme/SettingsContext';
 
 const Stack = createNativeStackNavigator();
 
 export default function RootNavigator() {
   const { currentTheme } = useTheme();
+  const { backgroundBlur } = useSettings();
   const [settingsVisible, setSettingsVisible] = useState(false);
 
-  return (
-    <NavigationContainer>
+  const content = (
+    <NavigationContainer
+      theme={{
+        ...DarkTheme,
+        dark: true,
+        colors: {
+          ...DarkTheme.colors,
+          primary: currentTheme.accent,
+          background: 'transparent',
+          card: 'transparent',
+          text: currentTheme.text,
+          border: currentTheme.border,
+          notification: currentTheme.accent,
+        },
+      }}
+    >
       <View style={{ flex: 1 }}>
         <Stack.Navigator
           screenOptions={{
@@ -48,4 +65,37 @@ export default function RootNavigator() {
       <SettingsModal visible={settingsVisible} onClose={() => setSettingsVisible(false)} />
     </NavigationContainer>
   );
+
+  return (
+    <View style={styles.background}>
+      {currentTheme.backgroundImage ? (
+        <>
+          <ImageBackground
+            source={currentTheme.backgroundImage}
+            style={StyleSheet.absoluteFillObject}
+            resizeMode="cover"
+          />
+          {backgroundBlur > 0 && (
+            <BlurView
+              intensity={backgroundBlur}
+              tint="default"
+              experimentalBlurMethod="dimezisBlurView"
+              style={StyleSheet.absoluteFillObject}
+            />
+          )}
+        </>
+      ) : (
+        <View
+          style={[StyleSheet.absoluteFillObject, { backgroundColor: currentTheme.background }]}
+        />
+      )}
+      {content}
+    </View>
+  );
 }
+
+const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+  },
+});

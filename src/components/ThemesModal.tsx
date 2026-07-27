@@ -8,6 +8,7 @@ import {
   PanResponder,
   Animated,
   Dimensions,
+  ImageBackground,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { spacing, fontSize } from '../theme/globalStyles';
@@ -257,6 +258,10 @@ function ThemeCard({
       borderColor: theme.border,
       padding: spacing.sm,
       justifyContent: 'flex-end',
+      overflow: 'hidden',
+    },
+    previewImage: {
+      borderRadius: 12,
     },
     previewSurface: {
       borderRadius: 8,
@@ -311,24 +316,41 @@ function ThemeCard({
     },
   });
 
+  const previewInner = (
+    <>
+      <View style={[styles.previewSurface, { backgroundColor: theme.surface }]}>
+        <View style={[styles.previewAccentDot, { backgroundColor: theme.accent }]} />
+        <View style={[styles.previewTextLine, { backgroundColor: theme.text }]} />
+      </View>
+      {theme.isPremium && (
+        <View style={styles.badge}>
+          <Text style={styles.badgeText}>PREMIUM</Text>
+        </View>
+      )}
+      {isActive && (
+        <View style={styles.activeBadge}>
+          <Ionicons name="checkmark" size={12} color={currentTheme.background} />
+        </View>
+      )}
+    </>
+  );
+
   return (
     <TouchableOpacity style={styles.card} onPress={onPress}>
-      <View style={[styles.preview, { backgroundColor: theme.background }]}>
-        <View style={[styles.previewSurface, { backgroundColor: theme.surface }]}>
-          <View style={[styles.previewAccentDot, { backgroundColor: theme.accent }]} />
-          <View style={[styles.previewTextLine, { backgroundColor: theme.text }]} />
+      {theme.backgroundImage ? (
+        <ImageBackground
+          source={theme.backgroundImage}
+          style={styles.preview}
+          imageStyle={styles.previewImage}
+          resizeMode="cover"
+        >
+          {previewInner}
+        </ImageBackground>
+      ) : (
+        <View style={[styles.preview, { backgroundColor: theme.background }]}>
+          {previewInner}
         </View>
-        {theme.isPremium && (
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>PRO</Text>
-          </View>
-        )}
-        {isActive && (
-          <View style={styles.activeBadge}>
-            <Ionicons name="checkmark" size={12} color={currentTheme.background} />
-          </View>
-        )}
-      </View>
+      )}
       <Text style={styles.cardLabel}>{theme.name}</Text>
       {statusText && <Text style={styles.trialLabel}>{statusText}</Text>}
     </TouchableOpacity>
